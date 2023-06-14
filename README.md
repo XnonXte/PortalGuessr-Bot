@@ -1,7 +1,6 @@
 # PortalGuessr
 
 A bot about guessing a Portal chamber from a random picture taken from every spots imaginable, much like [GeoGuessr](https://www.geoguessr.com/), thus the name PortalGuessr.
-The bot is under [MIT license](https://opensource.org/license/mit/) and therefore copying, changing, or distributing the source code is allowed.
 
 ## How to contribute?
 
