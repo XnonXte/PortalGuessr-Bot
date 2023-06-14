@@ -1,8 +1,8 @@
-# PortalGuessr 
+# PortalGuessr
 
 A bot about guessing a Portal chamber from a random picture taken from every spots imaginable, much like [GeoGuessr](https://www.geoguessr.com/), thus the name PortalGuessr. Written in Python with the py-cord library.
 
-# Contributions
+## Contributions
 
 If you want to contribute on getting the data sets for the bot, you could do so by joining the [discord server](https://discord.gg/hHYfnqa6zS) then refer to `# updates` for more information.
 
