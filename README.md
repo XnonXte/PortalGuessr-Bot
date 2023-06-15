@@ -8,4 +8,4 @@ If you want to contribute on getting the data sets for the bot, you could do so 
 
 ## Self-hosting the bot
 
-Hosting the bot would be as simple as changing the token argument inside the `bot.run()` function, then launch launch.bat for an easy startup. Download the release version if available.
+Hosting the bot would be as simple as changing the token argument inside the `bot.run()` function, then launch `launch.bat` for an easy startup. Download release version if available.
