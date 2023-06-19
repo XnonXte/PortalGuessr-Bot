@@ -1,30 +1,37 @@
 import json
 
 
-class AuthManager:
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.data = self.load_data()
+class AdminManager:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.data = {}
 
     def load_data(self):
-        try:
-            with open(self.file_path, "r") as file:
-                data = json.load(file)
-            return data
-        except FileNotFoundError:
-            return {}
+        """Loads the data from a specifed JSON file path"""
+        with open(self.filepath, "r") as file:
+            self.data = json.load(file)
+            return self.data
 
     def save_data(self):
-        with open(self.file_path, "w") as file:
+        """Saves the data to a specifed JSON file path"""
+        with open(self.filepath, "w") as file:
             json.dump(self.data, file, indent=4)
 
-    def add_authorized_user(self, username, user_id):
-        if "authorized" not in self.data:
-            self.data["authorized"] = []
-        self.data["authorized"].append({username: user_id})
+    def add_admin(self, username, user_id):
+        """Adds an admin to the data"""
+        for key in self.data:
+            if str(user_id) == key:
+                raise KeyError(f"There's already a key with the name {username}")
 
-    def remove_authorized_user(self, username):
-        if "authorized" in self.data:
-            self.data["authorized"] = [
-                user for user in self.data["authorized"] if username not in user
-            ]
+        self.data[str(user_id)] = username
+
+    def remove_admin(self, user_id):
+        """Removes an admin from the data"""
+        found = False
+        for key in self.data:
+            if str(user_id) == key:
+                del self.data[key]
+                found = True
+                break
+        if not found:
+            raise KeyError(f"Key was not found with the name {user_id}")

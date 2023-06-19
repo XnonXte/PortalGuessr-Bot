@@ -1,18 +1,44 @@
 import os
 import random
 import json
-from typing import Any
-from components import variables
+
+chambers_list = [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "e00",
+    "e01",
+    "e02",
+]
 
 
 class Guessr:
-    def __init__(self, difficulty):
-        self.difficulty = difficulty
+    def __init__(self):
+        """Initialize a new Guessr difficulty object."""
+        self.difficulty = difficulty = ("Easy", "Medium", "Hard")
 
     def get_guess(self):
-        random_chamber = random.choice(variables.chambers_list)
+        """Get a guessr question."""
+        random_chamber = random.choice(chambers_list)
+        random_difficulty = random.choice(self.difficulty)
 
-        image_path = f"resources\images\{self.difficulty}\{random_chamber}"
+        image_path = f"resources/images/{random_difficulty}/{random_chamber}"
         image_files = [
             file for file in os.listdir(image_path)
         ]  # Creates a list of images for the random file path.
@@ -24,30 +50,46 @@ class Guessr:
             image_path, image_files[random_image_index]
         )  # Gets the path for the random image.
 
-        return random_image_path, random_chamber
+        return random_image_path, random_chamber, random_difficulty
 
 
-class GuessrLeaderboard:
-    def __init__(self, filename):
-        self.filename = filename
-        self.leaderboard = {}
+class GuessrUsersLeaderboard:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.stats = {}
 
-    def load(self):
-        with open(self.filename, "r") as file:
-            self.leaderboard = json.load(file)
+    def load_stats(self):
+        """Load the users' stats from the leaderboard."""
+        with open(self.filepath, "r") as file:
+            self.stats = json.load(file)
+            return self.stats
 
-    def save(self):
-        with open(self.filename, "w") as file:
-            json.dump(self.leaderboard, file)
+    def save_stats(self):
+        """Save the users' stats to the leaderboard."""
+        with open(self.filepath, "w") as file:
+            json.dump(self.stats, file)
 
-    def add_score(self, user_id, score):
-        if user_id not in self.leaderboard:
-            self.leaderboard[user_id] = score
-        else:
-            self.leaderboard[user_id] += score
+    def add_user_stats(self, user_id, difficulty):
+        """Add a user's stats to the leaderboard."""
+        if str(user_id) not in self.stats:
+            self.stats[str(user_id)] = {"Easy": 0, "Medium": 0, "Hard": 0}
 
-    def get_sorted_leaderboard(self):
-        sorted_leaderboard = sorted(
-            self.leaderboard.items(), key=lambda x: x[1], reverse=True
+        self.stats[str(user_id)][difficulty] += 1
+
+    def get_sorted_stats(self):
+        """Returns a sorted list of users' stats in descending order"""
+        return sorted(
+            self.stats.items(), key=lambda x: sum(x[1].values()), reverse=True
         )
-        return sorted_leaderboard
+
+    def delete_user_stats(self, user_id):
+        """Delete a user's stats from the leaderboard"""
+        key_to_remove = None
+        for key in self.stats:
+            if str(user_id) == key:
+                key_to_remove = key
+
+        if key_to_remove:
+            del self.stats[key_to_remove]
+        else:
+            raise KeyError(f"{user_id} not found in the leaderboard!")
