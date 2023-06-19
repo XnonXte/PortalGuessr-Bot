@@ -29,16 +29,11 @@ chambers_list = [
 
 
 class Guessr:
-    def __init__(self):
-        """Initialize a new Guessr difficulty object."""
-        self.difficulty = difficulty = ("Easy", "Medium", "Hard")
-
-    def get_guess(self):
+    def get_guess(self, difficulty):
         """Get a guessr question."""
         random_chamber = random.choice(chambers_list)
-        random_difficulty = random.choice(self.difficulty)
 
-        image_path = f"resources/images/{random_difficulty}/{random_chamber}"
+        image_path = f"resources/images/{difficulty}/{random_chamber}"
         image_files = [
             file for file in os.listdir(image_path)
         ]  # Creates a list of images for the random file path.
@@ -50,7 +45,7 @@ class Guessr:
             image_path, image_files[random_image_index]
         )  # Gets the path for the random image.
 
-        return random_image_path, random_chamber, random_difficulty
+        return random_image_path, random_chamber
 
 
 class GuessrUsersLeaderboard:

@@ -1,5 +1,5 @@
 """
-PortalGussr v0.2.2-Beta Stable Version
+PortalGussr v0.2.2.1-Beta Stable Version
 
 Copyright (c) 2023 XnonXte
 """
@@ -12,6 +12,7 @@ from discord.ext import commands
 import time
 import asyncio
 import const
+import random
 from components.guessr import chambers_list
 from components.guessr import Guessr, GuessrUsersLeaderboard
 from components.buttons import HelpButtonsLink
@@ -21,7 +22,7 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
-version = "v0.2.2-beta"
+version = "v0.2.2.1-beta"
 token = environ["BOTTOKEN"]
 
 py_cord_version = discord.__version__
@@ -74,7 +75,14 @@ async def ping(ctx: commands.Context):
 
 
 @bot.slash_command(description="Starts a Portalguesser game.")
-async def guess(ctx: commands.Context):
+async def guess(
+    ctx: commands.Context,
+    difficulty: discord.Option(
+        choices=["Easy", "Medium", "Hard"],
+        description="Choose a difficulty (leave blank for random difficulty).",
+        required=False,
+    ) = random.choice(["Easy", "Medium", "Hard"]),
+):
     global is_guessr_running
 
     # A check whether the game is already running or not.
@@ -86,10 +94,9 @@ async def guess(ctx: commands.Context):
         return
 
     is_guessr_running = True
-    guessr_request = Guessr().get_guess()
+    guessr_request = Guessr().get_guess(difficulty)
     guessr_image = guessr_request[0]
     guessr_correct_answer = guessr_request[1]
-    guessr_difficulty = guessr_request[2]
 
     # Green for easy difficulty, yellow for medium difficulty, red for hard difficulty.
     difficulty_colors = {
@@ -97,15 +104,15 @@ async def guess(ctx: commands.Context):
         "Medium": discord.Color.from_rgb(204, 204, 0),
         "Hard": discord.Color.from_rgb(178, 34, 34),
     }
-    difficulty_color_accent = difficulty_colors.get(guessr_difficulty)
+    difficulty_color_accent = difficulty_colors.get(difficulty)
     guessr_embed = discord.Embed(
         title="Which chamber is this?",
-        description=f"Difficulty: {guessr_difficulty}",
+        description=f"Difficulty: {difficulty}",
         color=difficulty_color_accent,
     )
     guessr_embed.set_image(url="attachment://embed.jpg")
     guessr_embed.set_footer(
-        text="Answer with a valid chamber number to make a guess! Please send a response within the next 30 seconds.",
+        text="Answer with a valid chamber number to make a guess! Please send a response within the next 20 seconds.",
         icon_url="attachment://logo.jpg",
     )
     local_files = [
@@ -135,9 +142,9 @@ async def guess(ctx: commands.Context):
     guessr_user_have_answered = []
     guessr_user_count = 0
 
-    # Timeout in 30 seconds if the user hasn't answered correctly.
+    # Timeout in 20 seconds if the user hasn't answered correctly.
     start_time = time.time()
-    timeout_seconds = 30
+    timeout_seconds = 20
     elapsed_time = 0
 
     try:
@@ -147,28 +154,29 @@ async def guess(ctx: commands.Context):
                 timeout=timeout_seconds - elapsed_time,
             )
 
-            # Check to make sure the user responding wouldn't answer twice.
+            # Check to make sure the user responding wouldn't be able to answer twice.
             if response.author.id not in guessr_user_have_answered:
                 guessr_user_have_answered.append(response.author.id)
                 guessr_user_count += 1
+
+                if response.content.lower() == guessr_correct_answer:
+                    await response.reply(
+                        f"You're correct! Congratulations you earned a point for {difficulty.lower()} difficulty."
+                    )
+
+                    # Saving the score into leaderboard logic.
+                    guessr_leaderboard.load_stats()
+                    guessr_leaderboard.add_user_stats(response.author.id, difficulty)
+                    guessr_leaderboard.save_stats()
+                    break
             elif response.author.id in guessr_user_have_answered:
                 await response.reply("You've already answered this guessr!")
 
-            if response.content.lower() == guessr_correct_answer:
-                await response.reply(
-                    f"You're correct! Congratulations you earned a point."
-                )
-
-                # Saving scores into the leaderboard logic.
-                guessr_leaderboard.load_stats()
-                guessr_leaderboard.add_user_stats(response.author.id, guessr_difficulty)
-                guessr_leaderboard.save_stats()
-                break
             if guessr_user_count == 5:
                 max_guess_embed = discord.Embed(
                     title="Game Over!",
                     description="Good luck next time.",
-                    color=bot_accent_color,
+                    color=discord.Color.from_rgb(237, 237, 237),
                 )
                 await ctx.send(embed=max_guess_embed)
                 break
@@ -178,15 +186,12 @@ async def guess(ctx: commands.Context):
 
             # Checking if the timeout has been reached, ultimately ending the game.
             if elapsed_time == timeout_seconds:
-                raise TimeoutError(
-                    f"{timeout_seconds} seconds timeout has been triggered."
-                )
-    except TimeoutError as e:
-        print(e)
-        timeout_embed = discord.Embed(title="Time's up!", color=bot_accent_color)
+                raise TimeoutError
+    except TimeoutError:
+        timeout_embed = discord.Embed(
+            title="Time's up!", color=discord.Color.from_rgb(237, 237, 237)
+        )
         await ctx.send(embed=timeout_embed)
-    except Exception as exc:
-        print(exc)
     finally:
         is_guessr_running = False
 
