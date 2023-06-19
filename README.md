@@ -1,6 +1,6 @@
 # PortalGuessr
 
-PortalGuessr is a Python bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Written in Python using py-cord library.
+PortalGuessr is a Python bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Written in Python with [py-cord](https://github.com/Pycord-Development/pycord) library.
 
 ## Contributions
 
@@ -10,15 +10,32 @@ We welcome contributions to enhance the data sets used by the bot. If you would 
 
 Hosting the bot is straightforward. Simply modify the token argument inside the `bot.run()` function and launch `launch.bat` for an easy startup. You can download the release version if available.
 
+### Requirements
+
+The requirements.txt should contain the required libraries that your IDE will depend on to run this bot locally, and they will be installed using:
+
+```shell
+pip install -r requirements.txt
+```
+
 ## Changelogs
 
+- v.0.2.2-beta:
+
+  - Fixed the issues with several admin commands not working properly.
+  - Fixed the issue with the leaderboard not being able to display usernames and scores as intended.
+  - Removed /upload since it prompts some hurdles that I don't want to fix at the moment.
+  - The bot is now using discord.ext.commands instead of discord.ext.bridge for a temporary fix to hybrid commands that cannot pass arguments into options.
+
 - v0.2.1-beta-Unstable-Build:
+
   - Added several new features, including admin commands.
   - Fixed the issue with how the bot listens to responses in /guess.
   - Added /leaderboard command.
   - Restructured PGComponents into smaller components for ease of use.
 
 - v0.2-beta:
+
   - Added easy, medium, and hard difficulty levels for /guess.
   - Introduced /ping command to check the bot's latency.
   - Implemented several quality-of-life improvements.
