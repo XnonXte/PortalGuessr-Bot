@@ -2,15 +2,22 @@ import json
 
 
 class AdminManager:
+    """Class to manage the admin data, including adding and removing admins. Filepath is the path to the JSON file, if it didn't exist it will be created automatically."""
+
     def __init__(self, filepath):
         self.filepath = filepath
         self.data = {}
 
     def load_data(self):
         """Loads the data from a specifed JSON file path"""
-        with open(self.filepath, "r") as file:
-            self.data = json.load(file)
-            return self.data
+        try:
+            with open(self.filepath, "r") as file:
+                self.data = json.load(file)
+                return self.data
+        except FileNotFoundError:
+            with open(self.filepath, "x") as file:
+                self.data = {}
+                return self.data
 
     def save_data(self):
         """Saves the data to a specifed JSON file path"""

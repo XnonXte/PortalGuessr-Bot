@@ -11,12 +11,12 @@ import discord
 from discord.ext import commands
 import time
 import asyncio
-import const
 import random
-from components.guessr import chambers_list
-from components.guessr import Guessr, GuessrUsersLeaderboard
-from components.buttons import HelpButtonsLink
-from components.admin import AdminManager
+from Components.guessr import chambers_list
+from Components.guessr import Guessr, GuessrUsersLeaderboard
+from Components.buttons import HelpButtonsLink
+from Components.admin import AdminManager
+import const
 from os import environ
 from dotenv import load_dotenv
 
@@ -35,8 +35,10 @@ bot = commands.Bot(
 )  # Here we disable the help command because we have our own help command on line 50.
 
 is_guessr_running = False
-guessr_leaderboard = GuessrUsersLeaderboard("resources/local/leaderboard.json")
-admin_manager = AdminManager("resources/local/authorized.json")
+guessr_leaderboard = GuessrUsersLeaderboard(
+    "Database/leaderboard.json"
+)  # If filepath doesn't exist, it will create a new one.
+admin_manager = AdminManager("Database/authorized.json")
 
 
 @bot.event
@@ -47,8 +49,8 @@ async def on_ready():
 @bot.slash_command(description="Shows an overview of the available slash command.")
 async def help(ctx: commands.Context):
     help_message_embed = discord.Embed(
-        title="About PortalGuessr",
-        description="PortalGuessr is a bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr.\n\nAll of my commmands are invoked using the built-in slash command on discord. Have fun using the bot!",
+        title="Help & About",
+        description="PortalGuessr is a bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Have fun using the bot!",
         color=bot_accent_color,
     )
     help_message_embed.add_field(name="Main Commands", value=const.available_commands)
@@ -74,7 +76,7 @@ async def ping(ctx: commands.Context):
     await ctx.respond(f"Pong! `{round(bot.latency * 1000)}ms`")
 
 
-@bot.slash_command(description="Starts a Portalguesser game.")
+@bot.slash_command(description="Starts a PortalGuessr game.")
 async def guess(
     ctx: commands.Context,
     difficulty: discord.Option(
@@ -270,8 +272,6 @@ async def remove_stats(
     ctx: commands.Context, target_user: discord.SlashCommandOptionType.user
 ):
     admins_list = admin_manager.load_data()
-
-    # A check if the user invoking this command is an admin.
     if str(ctx.author.id) not in admins_list:
         await ctx.respond(
             "You're not an admin, you can't remove users from the leaderboard.",
@@ -324,7 +324,6 @@ async def deauthorize(
     ctx: commands.Context, target_user: discord.SlashCommandOptionType.user
 ):
     admins_list = admin_manager.load_data()
-    found = False
     if str(ctx.author.id) not in admins_list:
         await ctx.respond(
             "You're not an admin, you can't remove users from the leaderboard.",

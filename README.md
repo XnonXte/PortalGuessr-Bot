@@ -8,7 +8,7 @@ We welcome contributions to enhance the data sets used by the bot. If you would 
 
 ## Self-hosting the bot
 
-Hosting the bot is straightforward. Simply modify the token argument inside the `bot.run()` function and launch `launch.bat` for an easy startup. You can download the release version if available.
+Hosting the bot is straightforward. Simply modify the token argument inside the `bot.run()` function and launch `start.bat` for an easy startup. You can download the release version if available.
 
 ### Requirements
 

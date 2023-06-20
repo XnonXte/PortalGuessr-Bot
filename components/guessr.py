@@ -49,15 +49,22 @@ class Guessr:
 
 
 class GuessrUsersLeaderboard:
+    """Class to handle the users' leaderboard. If filename doesn't exist, it will create it automatically."""
+
     def __init__(self, filepath):
         self.filepath = filepath
         self.stats = {}
 
     def load_stats(self):
         """Load the users' stats from the leaderboard."""
-        with open(self.filepath, "r") as file:
-            self.stats = json.load(file)
-            return self.stats
+        try:
+            with open(self.filepath, "r") as file:
+                self.stats = json.load(file)
+                return self.stats
+        except FileNotFoundError:
+            with open(self.filepath, "x") as file:
+                self.stats = {}
+                return self.stats
 
     def save_stats(self):
         """Save the users' stats to the leaderboard."""
