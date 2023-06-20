@@ -94,4 +94,4 @@ class GuessrUsersLeaderboard:
         if key_to_remove:
             del self.stats[key_to_remove]
         else:
-            raise KeyError(f"{user_id} not found in the leaderboard!")
+            raise KeyError("User not found in leaderboard.")

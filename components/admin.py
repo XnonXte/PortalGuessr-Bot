@@ -16,7 +16,9 @@ class AdminManager:
                 return self.data
         except FileNotFoundError:
             with open(self.filepath, "x") as file:
-                self.data = {}
+                self.data = {
+                    "706330866267193344": "xnonxte"
+                }  # My user_id and username on discord as the default value for data, change it with yours if you want to use the command yourself
                 return self.data
 
     def save_data(self):

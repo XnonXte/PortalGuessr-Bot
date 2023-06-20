@@ -20,7 +20,12 @@ pip install -r requirements.txt
 
 ## Changelogs
 
-- v.0.2.2-beta:
+- v0.3-beta:
+
+  - Rewritten using Rapptz's discord.py; this will make future development easier.
+  - Same as v0.2.2.1-beta feature-wise except for several QoL improvements and some slight renaming.
+
+- v0.2.2-beta:
 
   - Fixed the issues with several admin commands not working properly.
   - Fixed the issue with the leaderboard not being able to display usernames and scores as intended.
