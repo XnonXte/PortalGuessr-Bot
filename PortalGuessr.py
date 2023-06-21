@@ -16,6 +16,7 @@ import time
 import const
 from components.guessr import Guessr, GuessrUsersStatistics
 from components.buttons import HelpButtonsLink
+from components.keep_alive import keep_alive
 from os import environ
 from dotenv import load_dotenv
 
@@ -307,4 +308,5 @@ async def on_app_command_error(
         raise error
 
 
+keep_alive()
 bot.run(discord_bot_token)
