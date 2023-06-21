@@ -8,4 +8,5 @@ main_commands = """
 
 config_commands = """
 `remove` - Removes a spesific user from the statistics.
+`upload` - Coming soon!
 """

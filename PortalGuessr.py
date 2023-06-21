@@ -57,7 +57,9 @@ async def on_ready():
 
     # Set the activity of the bot, showing how many servers the bot is in.
     await bot.change_presence(
-        activity=discord.Game(name=f"In {len(bot.guilds)} servers!")
+        activity=discord.Activity(
+            type=discord.ActivityType.watching, name=f"on {len(bot.guilds)} servers"
+        )
     )
 
 
