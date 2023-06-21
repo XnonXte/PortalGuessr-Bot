@@ -1,5 +1,5 @@
 """
-PortalGussr v0.3-beta Stable Version
+PortalGussr v0.3.1-beta Stable Version
 
 Copyright (c) 2023 XnonXte
 """
@@ -9,27 +9,23 @@ Copyright (c) 2023 XnonXte
 import discord
 from discord import app_commands
 from discord.ext import commands
-from typing import Optional, Literal
+from typing import Literal
+import random
 import asyncio
 import time
 import const
-import random
-from components.guessr import chambers_list
-from components.guessr import Guessr, GuessrUsersLeaderboard
+from components.guessr import Guessr, GuessrUsersStatistics
 from components.buttons import HelpButtonsLink
-from components.admin import AdminManager
 from os import environ
 from dotenv import load_dotenv
 
+
 load_dotenv(".env")
-version = "v0.3-beta"
 discord_bot_token = environ.get("BOTTOKEN")
-dpy_version = discord.__version__
+
+portalguessr_version = "v0.3.1-beta"
 bot_accent_color = discord.Color.from_rgb(203, 48, 48)
-guessr_leaderboard = GuessrUsersLeaderboard(
-    "db/leaderboard.json"
-)  # If file path doesn't exist it will be created automatically.
-admin_manager = AdminManager("db/authorized.json")
+guessr_statistics = GuessrUsersStatistics("db/leaderboard.json")
 is_guessr_running = False
 
 intents = discord.Intents.default()
@@ -39,10 +35,6 @@ bot = commands.Bot(command_prefix=";", intents=intents)
 
 @bot.event
 async def on_ready():
-    # Getting IDs of guild that the bot is in.
-    guild_ids = []
-    async for guild in bot.fetch_guilds():
-        guild_ids.append(guild.id)
     print(
         """
   ___         _        _  ___                
@@ -52,9 +44,18 @@ async def on_ready():
                                              
 """
     )
-    print(f"We have logged in as {bot.user}!")
     print(
-        f"The bot is in {len(guild_ids)} guilds | {len(await bot.tree.sync())} application commands have been synced."
+        f"We have logged in as {bot.user}! We are in {len(bot.guilds)} guild(s) | discord.py {discord.__version__}"
+    )
+    try:
+        synced = await bot.tree.sync()
+        print(f"Successfully synced {len(synced)} command(s).")
+    except Exception as e:
+        print(e)
+
+    # Set the activity of the bot, showing how many servers the bot is in.
+    await bot.change_presence(
+        activity=discord.Game(name=f"In {len(bot.guilds)} servers!")
     )
 
 
@@ -65,12 +66,12 @@ async def help(interaction: discord.Interaction):
         description="PortalGuessr is a bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Have fun using the bot!",
         color=bot_accent_color,
     )
-    help_message_embed.add_field(name="Main Commands", value=const.available_commands)
+    help_message_embed.add_field(name="Main Commands", value=const.main_commands)
     help_message_embed.add_field(
-        name="Config Commands", value=const.admin_only_commands, inline=False
+        name="Config Commands", value=const.config_commands, inline=False
     )
     help_message_embed.set_footer(
-        text=f"PortalGuessr {version} - Developed with 💖 by XnonXte & Contributors.",
+        text=f"PortalGuessr {portalguessr_version} - Developed with 💖 by XnonXte & Contributors.",
         icon_url="attachment://logo.jpg",
     )
     help_message_embed.set_thumbnail(url="attachment://logo.jpg")
@@ -94,9 +95,7 @@ async def ping(interaction: discord.Interaction):
 )
 async def guess(
     interaction: discord.Interaction,
-    difficulty: Optional[Literal["Easy", "Medium", "Hard"]] = random.choice(
-        ["Easy", "Medium", "Hard"]
-    ),
+    difficulty: Literal["Easy", "Medium", "Hard", "Random"],
 ):
     global is_guessr_running
 
@@ -107,27 +106,25 @@ async def guess(
             ephemeral=True,
         )
         return
+    else:
+        is_guessr_running = True
 
-    is_guessr_running = True
+    if difficulty == "Random":
+        difficulty = random.choice(["Easy", "Medium", "Hard"])
+
     guessr_request = Guessr().get_guess(difficulty)
     guessr_image = guessr_request[0]
     guessr_correct_answer = guessr_request[1]
-
-    # Green for easy difficulty, yellow for medium difficulty, red for hard difficulty.
-    difficulty_colors = {
-        "Easy": discord.Color.from_rgb(46, 139, 87),
-        "Medium": discord.Color.from_rgb(204, 204, 0),
-        "Hard": discord.Color.from_rgb(178, 34, 34),
-    }
-    difficulty_color_accent = difficulty_colors.get(difficulty)
+    guessr_color_accent = guessr_request[2]
+    guessr_timeout = guessr_request[3]
     guessr_embed = discord.Embed(
         title="Which chamber is this?",
         description=f"Difficulty: {difficulty}",
-        color=difficulty_color_accent,
+        color=guessr_color_accent,
     )
     guessr_embed.set_image(url="attachment://embed.jpg")
     guessr_embed.set_footer(
-        text="Answer with a valid chamber number to make a guess! Please send a response within the next 25 seconds.",
+        text=f"Answer with a valid chamber number to make a guess! Please send a response within the next {guessr_timeout} seconds.",
         icon_url="attachment://logo.jpg",
     )
     local_files = [
@@ -135,14 +132,17 @@ async def guess(
         discord.File("logo.jpg", filename="logo.jpg"),
     ]
 
-    # This checks for the channel and the chamber the user is in.
+    # This checks for the same channel and valid chamber for the response message.
     def is_valid(message: discord.Message):
         return (
             message.channel.id == interaction.channel.id
-            and message.content.lower() in chambers_list
+            and message.content.lower() in Guessr.chambers_list
         )
 
-    await interaction.response.send_message(
+    # We use response.defer() to prevent the bot from returning an unknown interaction since the message needs to be sent in under 3 seconds without deferring.
+    # We will see this through the bot.
+    await interaction.response.defer(thinking=True)
+    await interaction.followup.send(
         files=local_files,
         embed=guessr_embed,
     )
@@ -151,9 +151,9 @@ async def guess(
     guessr_user_count = 0
     guessr_max_count = 5
 
-    # 25 seconds timeout if the user hasn't answered correctly.
+    # 20, 25, or 30 seconds timeout if the user hasn't answered correctly.
     start_time = time.time()
-    timeout_seconds = 25
+    timeout_seconds = guessr_timeout
     elapsed_time = 0
 
     while elapsed_time < timeout_seconds:
@@ -179,9 +179,11 @@ async def guess(
                 )
 
                 # Saving the score into leaderboard logic.
-                guessr_leaderboard.load_stats()
-                guessr_leaderboard.add_user_stats(response.author.id, difficulty)
-                guessr_leaderboard.save_stats()
+                guessr_statistics.load_stats()
+                guessr_statistics.add_user_stats(
+                    interaction.guild.id, response.author.id, difficulty
+                )
+                guessr_statistics.save_stats()
                 break
             elif guessr_user_count == guessr_max_count:
                 max_guess_embed = discord.Embed(
@@ -200,158 +202,109 @@ async def guess(
     is_guessr_running = False
 
 
-@bot.tree.command(description="Returns the current leaderboard.")
-async def leaderboard(interaction: discord.Interaction):
-    guessr_leaderboard.load_stats()
-    leaderboard = (
-        guessr_leaderboard.get_sorted_stats()
-    )  # Example of dictionary that will be returned: [('<user_id>', {'Easy': 2, 'Medium': 3, 'Hard': 4})].
+@bot.tree.command(description="Returns the current statistics.")
+async def stats(interaction: discord.Interaction):
+    guessr_statistics.load_stats()
 
-    leaderboard_message = ""
-
-    # We use enumerate to get the index of every keys in the dictionary, we start at index 1.
-    for index, (user_id, stats) in enumerate(leaderboard, start=1):
-        user = await bot.fetch_user(int(user_id))
-        leaderboard_message += f"{index}. `{user.name}` has completed "
-        stats_entries = []
-        for difficulty in stats:
-            count = stats.get(difficulty)
-            stats_entries.append(f"{count} {difficulty.lower()}")
-        leaderboard_message += ", ".join(stats_entries)
-        leaderboard_message += f" difficulty Guessr.\n"
-
-    leaderboard_embed = discord.Embed(
-        title="Leaderboard", description=leaderboard_message, color=bot_accent_color
-    )
-    leaderboard_embed.set_footer(
-        text=f"{len(leaderboard)} users in the leaderboard.",
-        icon_url="attachment://logo.jpg",
-    )
-    await interaction.response.send_message(
-        file=discord.File("logo.jpg", filename="logo.jpg"), embed=leaderboard_embed
-    )
-
-
-@bot.tree.command(description="Returns the stats for a spesific user.")
-@app_commands.describe(target_user="The user to get the stats for.")
-async def stats_for(interaction: discord.Interaction, target_user: discord.Member):
-    guessr_leaderboard.load_stats()
-    leaderboard = guessr_leaderboard.get_sorted_stats()
-
-    found = False
-    stats_message = ""
-    for user_id, stats in leaderboard:
-        if target_user.id == int(user_id):
-            user = await bot.fetch_user(target_user.id)
-            stats_message += f"`{user.name}` has completed "
-            user_stats_entries = []
-            for difficulty in stats:
-                count = stats.get(difficulty)
-                user_stats_entries.append(f"{count} {difficulty.lower()}")
-            stats_message += ", ".join(user_stats_entries)
-            stats_message += f" difficulty Guessr.\n"
-            found = True
-
-    if not found:
+    try:
+        # Example of dictionary that will be returned: [('706330866267193344', {'Easy': 3, 'Medium': 0, 'Hard': 0})]
+        statistics = guessr_statistics.get_sorted_stats(interaction.guild.id)
+    except KeyError:
         await interaction.response.send_message(
-            f"The stats for {target_user.name} doesn't exist!",
+            f"The statistics for {interaction.guild.name} is empty!",
             ephemeral=True,
         )
         return
 
+    statistics_message = ""
+    for index, (user_id, stats) in enumerate(statistics, start=1):
+        user = await bot.fetch_user(int(user_id))
+        statistics_message += f"{index}. `{user.name}` has completed "
+        stats_entries = []
+        for difficulty in stats:
+            count = stats.get(difficulty)
+            stats_entries.append(f"{count} {difficulty.lower()}")
+        statistics_message += ", ".join(stats_entries)
+        statistics_message += f" difficulty Guessr.\n"
+
+    statistics_embed = discord.Embed(
+        title=f"{interaction.guild.name} Statistics",
+        description=statistics_message,
+        color=bot_accent_color,
+    )
+    statistics_embed.set_footer(
+        text=f"{len(statistics)} users in the statistics.",
+        icon_url="attachment://logo.jpg",
+    )
+    await interaction.response.defer()
+    await interaction.followup.send(
+        file=discord.File("logo.jpg", filename="logo.jpg"),
+        embed=statistics_embed,
+    )
+
+
+@bot.tree.command(description="Returns the statistics for a spesific user.")
+@app_commands.describe(target_user="The user to get the statistics for.")
+async def stats_for(interaction: discord.Interaction, target_user: discord.Member):
+    guessr_statistics.load_stats()
+
+    try:
+        user_stats = guessr_statistics.get_user_stats(
+            interaction.guild.id, target_user.id
+        )
+    except KeyError:
+        await interaction.response.send_message(
+            f"The stats for {target_user.name} in {interaction.guild.name} not found!",
+            ephemeral=True,
+        )
+        return
+
+    stats_message = f'`{target_user.name}` has completed {user_stats["Easy"]} easy, {user_stats["Medium"]} medium, and {user_stats["Hard"]} hard difficulty Guessr.'
     stats_embed = discord.Embed(
-        title=f"Stats for {target_user.name}",
+        title=f"Statistics for {target_user.name} in {interaction.guild.name}",
         description=stats_message,
         color=bot_accent_color,
     )
     await interaction.response.send_message(embed=stats_embed)
 
 
-@bot.tree.command(description="Removes a spesific user from the leaderboard.")
-@app_commands.describe(target_user="The user to remove from the leaderboard.")
+@bot.tree.command(description="Removes a spesific user from the statistics.")
+@app_commands.describe(target_user="The user to remove from the statistics.")
+@app_commands.checks.has_permissions(manage_guild=True)
 async def remove_stats(interaction: discord.Interaction, target_user: discord.Member):
-    admins_list = admin_manager.load_data()
-    if str(interaction.user.id) not in admins_list:
-        await interaction.response.send_message(
-            "You're not authorized to use this command.",
-            ephemeral=True,
-        )
-        return
-
     try:
-        guessr_leaderboard.load_stats()
-        guessr_leaderboard.delete_user_stats(target_user.id)
-        guessr_leaderboard.save_stats()
+        guessr_statistics.load_stats()
+        guessr_statistics.delete_user_stats(target_user.id)
+        guessr_statistics.save_stats()
         await interaction.response.send_message(
-            f"{target_user.name} has been removed from the leaderboard!"
+            f"{target_user.name} has been removed from the statistics!"
         )
     except KeyError:
         await interaction.response.send_message(
-            f"{target_user.name} not found in the leaderboard!", ephemeral=True
+            f"{target_user.name} not found in the statistics!", ephemeral=True
         )
 
 
-@bot.tree.command(description="Authorizes a user.")
-@app_commands.describe(target_user="The user to authorize.")
-async def authorize(interaction: discord.Interaction, target_user: discord.Member):
-    admins_list = admin_manager.load_data()
-    if str(interaction.user.id) not in admins_list:
+# todo make a command to upload an image directly to the bot, possibly using os module.
+# todo this should be as simple as possible.
+
+# @bot.tree.command(description="Upload an image directly to the bot.")
+# @app_commands.describe(image="The image to upload.")
+# async def upload_image(interaction: discord.Interaction, image: discord.File):
+#     raise NotImplementedError
+
+
+@bot.tree.error  # Catch any errors inside bot.tree aka slash commands.
+async def on_app_command_error(
+    interaction: discord.Interaction, error: discord.app_commands.AppCommandError
+):
+    if isinstance(error, discord.app_commands.MissingPermissions):
         await interaction.response.send_message(
-            "You're not authorized to use this command.",
+            f"You don't have permission to use this command!",
             ephemeral=True,
         )
-        return
-
-    if interaction.user.id == target_user.id:
-        await interaction.response.send_message(
-            "You can't add yourself as an admin.", ephemeral=True
-        )
-        return
-
-    try:
-        # Loading the JSON file, returns a python dictionary.
-        admin_manager.load_data()
-        admin_manager.add_admin(target_user.name, target_user.id)
-
-        # Dumping the dictionary we've opened earlier to the JSON file we have.
-        admin_manager.save_data()
-        await interaction.response.send_message(f"{target_user.name} is now an admin!")
-    except KeyError as e:
-        print(e)
-        await interaction.response.send_message(
-            f"{target_user.name} is already an admin!", ephemeral=True
-        )
-
-
-@bot.tree.command(description="Removes authorization for a user.")
-@app_commands.describe(target_user="The user to deauthorize.")
-async def deauthorize(interaction: discord.Interaction, target_user: discord.Member):
-    admins_list = admin_manager.load_data()
-    if str(interaction.user.id) not in admins_list:
-        await interaction.response.send_message(
-            "You're not authorized to use this command.",
-            ephemeral=True,
-        )
-        return
-
-    if interaction.user.id == target_user.id:
-        await interaction.response.send_message(
-            "You can't add yourself as an admin.", ephemeral=True
-        )
-        return
-
-    try:
-        admin_manager.load_data()
-        admin_manager.remove_admin(target_user.id)
-        admin_manager.save_data()
-        await interaction.response.send_message(
-            f"{target_user.name} has been authorized as an admin!"
-        )
-    except KeyError as e:
-        print(e)
-        await interaction.response.send_message(
-            f"{target_user.name} is not an admin!", ephemeral=True
-        )
+    else:
+        raise error
 
 
 bot.run(discord_bot_token)

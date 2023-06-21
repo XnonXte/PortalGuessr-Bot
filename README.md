@@ -20,6 +20,13 @@ pip install -r requirements.txt
 
 ## Changelogs
 
+- v0.3.1-beta:
+
+  - Added activity status
+  - Renamed much of leaderboard to statistics
+  - Statistics (previously leaderboard) are now available for every server and they're separate from each other.
+  - Removes admin.py in components and instead rely on app_commands.checks.has_permission() for permissions check.
+
 - v0.3-beta:
 
   - Rewritten using Rapptz's discord.py; this will make future development easier.
@@ -47,4 +54,5 @@ pip install -r requirements.txt
   - Added the /bridge command.
 
 - v0.1-beta:
+
   - Initial commit, representing the most basic version of this bot.
