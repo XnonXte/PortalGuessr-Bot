@@ -4,7 +4,9 @@ PortalGussr v0.3.1-beta Stable Version
 Copyright (c) 2023 XnonXte
 """
 
+
 # todo list is in https://trello.com/b/iQgOc5H1/portalguesser
+# todo make a command to upload an image directly to the bot, possibly using os module, this should be as simple as possible.
 
 import discord
 from discord import app_commands
@@ -19,7 +21,6 @@ from components.buttons import HelpButtonsLink
 from components.keep_alive import keep_alive
 from os import environ
 from dotenv import load_dotenv
-
 
 load_dotenv(".env")
 discord_bot_token = environ.get("BOTTOKEN")
@@ -142,7 +143,7 @@ async def guess(
 
     # We use response.defer() to prevent the bot from returning an unknown interaction since the message needs to be sent in under 3 seconds without deferring.
     # We will see this through the bot.
-    await interaction.response.defer(thinking=True)
+    await interaction.response.defer()
     await interaction.followup.send(
         files=local_files,
         embed=guessr_embed,
@@ -226,7 +227,7 @@ async def stats(interaction: discord.Interaction):
             count = stats.get(difficulty)
             stats_entries.append(f"{count} {difficulty.lower()}")
         statistics_message += ", ".join(stats_entries)
-        statistics_message += f" difficulty Guessr.\n"
+        statistics_message += " difficulty Guessr.\n"
 
     statistics_embed = discord.Embed(
         title=f"{interaction.guild.name} Statistics",
@@ -286,22 +287,13 @@ async def remove_stats(interaction: discord.Interaction, target_user: discord.Me
         )
 
 
-# todo make a command to upload an image directly to the bot, possibly using os module.
-# todo this should be as simple as possible.
-
-# @bot.tree.command(description="Upload an image directly to the bot.")
-# @app_commands.describe(image="The image to upload.")
-# async def upload_image(interaction: discord.Interaction, image: discord.File):
-#     raise NotImplementedError
-
-
 @bot.tree.error  # Catch any errors inside bot.tree aka slash commands.
 async def on_app_command_error(
     interaction: discord.Interaction, error: discord.app_commands.AppCommandError
 ):
     if isinstance(error, discord.app_commands.MissingPermissions):
         await interaction.response.send_message(
-            f"You don't have permission to use this command!",
+            "You don't have permission to use this command!",
             ephemeral=True,
         )
     else:

@@ -48,7 +48,7 @@ class Guessr:
         difficulty_color = self.difficulty_colors.get(difficulty)
         difficulty_timeout = self.difficulty_timeouts.get(difficulty)
 
-        image_path = f"resources/images/{difficulty}/{random_chamber}"
+        image_path = f"Resources/images/{difficulty}/{random_chamber}"
         image_files = [
             file for file in os.listdir(image_path)
         ]  # Creates a list of images for the random file path.
