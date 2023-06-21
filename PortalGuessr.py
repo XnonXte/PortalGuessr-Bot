@@ -89,7 +89,9 @@ async def ping(interaction: discord.Interaction):
 
 
 @bot.tree.command(description="Starts a PortalGuessr game.")
-@app_commands.describe(difficulty="The difficulty of the game.")
+@app_commands.describe(
+    difficulty="Select the desired difficulty of the game (blank for random)."
+)
 async def guess(
     interaction: discord.Interaction,
     difficulty: Optional[Literal["Easy", "Medium", "Hard"]] = random.choice(
@@ -125,7 +127,7 @@ async def guess(
     )
     guessr_embed.set_image(url="attachment://embed.jpg")
     guessr_embed.set_footer(
-        text="Answer with a valid chamber number to make a guess! Please send a response within the next 20 seconds.",
+        text="Answer with a valid chamber number to make a guess! Please send a response within the next 25 seconds.",
         icon_url="attachment://logo.jpg",
     )
     local_files = [
@@ -147,59 +149,55 @@ async def guess(
 
     guessr_user_have_answered = []
     guessr_user_count = 0
+    guessr_max_count = 5
 
-    # Timeout in 20 seconds if the user hasn't answered correctly.
+    # 25 seconds timeout if the user hasn't answered correctly.
     start_time = time.time()
-    timeout_seconds = 20
+    timeout_seconds = 25
     elapsed_time = 0
 
-    try:
-        while elapsed_time < timeout_seconds:
-            response = await asyncio.wait_for(
-                bot.wait_for("message", check=is_valid),
-                timeout=timeout_seconds - elapsed_time,
+    while elapsed_time < timeout_seconds:
+        try:
+            response = await bot.wait_for(
+                "message", check=is_valid, timeout=timeout_seconds - elapsed_time
             )
+        except asyncio.TimeoutError:
+            timeout_embed = discord.Embed(
+                title="Time's up!", color=discord.Color.from_rgb(237, 237, 237)
+            )
+            await interaction.followup.send(embed=timeout_embed)
+            break
 
-            # Check to make sure the user responding wouldn't be able to answer twice.
-            if response.author.id not in guessr_user_have_answered:
-                guessr_user_have_answered.append(response.author.id)
-                guessr_user_count += 1
+        # Check to make sure the user responding wouldn't be able to answer twice.
+        if response.author.id not in guessr_user_have_answered:
+            guessr_user_have_answered.append(response.author.id)
+            guessr_user_count += 1
 
-                if response.content.lower() == guessr_correct_answer:
-                    await response.reply(
-                        f"You're correct! Congratulations you earned a point for {difficulty.lower()} difficulty."
-                    )
+            if response.content.lower() == guessr_correct_answer:
+                await response.reply(
+                    f"You're correct! Congratulations you earned a point for {difficulty.lower()} difficulty."
+                )
 
-                    # Saving the score into leaderboard logic.
-                    guessr_leaderboard.load_stats()
-                    guessr_leaderboard.add_user_stats(response.author.id, difficulty)
-                    guessr_leaderboard.save_stats()
-                    break
-            elif response.author.id in guessr_user_have_answered:
-                await response.reply("You've already answered this guessr!")
-
-            if guessr_user_count == 5:
+                # Saving the score into leaderboard logic.
+                guessr_leaderboard.load_stats()
+                guessr_leaderboard.add_user_stats(response.author.id, difficulty)
+                guessr_leaderboard.save_stats()
+                break
+            elif guessr_user_count == guessr_max_count:
                 max_guess_embed = discord.Embed(
                     title="Game Over!",
-                    description="Good luck next time.",
                     color=discord.Color.from_rgb(237, 237, 237),
                 )
                 await interaction.followup.send(embed=max_guess_embed)
                 break
+        else:
+            await response.reply("You've already answered this guessr!")
 
-            # Neccessary timeout logic, here we update elapsed_time everytime the loop iterates through.
-            elapsed_time = time.time() - start_time
+        # Update elapsed time everytime the loop iterates through.
+        elapsed_time = time.time() - start_time
 
-            # Checking if the timeout has been reached, ultimately ending the game.
-            if elapsed_time == timeout_seconds:
-                raise TimeoutError
-    except TimeoutError:
-        timeout_embed = discord.Embed(
-            title="Time's up!", color=discord.Color.from_rgb(237, 237, 237)
-        )
-        await interaction.followup.send(embed=timeout_embed)
-    finally:
-        is_guessr_running = False
+    # Ending the game.
+    is_guessr_running = False
 
 
 @bot.tree.command(description="Returns the current leaderboard.")
