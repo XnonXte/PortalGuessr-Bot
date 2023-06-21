@@ -135,6 +135,6 @@ class GuessrUsersStatistics:
             if user_id == key:
                 key_to_remove = key
         if key_to_remove:
-            del self.stats[key_to_remove]
+            del self.stats[server_id][key_to_remove]
         else:
             raise KeyError("User not found in statistics.")

@@ -26,7 +26,7 @@ discord_bot_token = environ.get("BOTTOKEN")
 
 portalguessr_version = "v0.3.1-beta"
 bot_accent_color = discord.Color.from_rgb(203, 48, 48)
-guessr_statistics = GuessrUsersStatistics("db/leaderboard.json")
+guessr_statistics = GuessrUsersStatistics("db/statistics.json")
 is_guessr_running = False
 
 intents = discord.Intents.default()
@@ -275,7 +275,7 @@ async def stats_for(interaction: discord.Interaction, target_user: discord.Membe
 async def remove_stats(interaction: discord.Interaction, target_user: discord.Member):
     try:
         guessr_statistics.load_stats()
-        guessr_statistics.delete_user_stats(target_user.id)
+        guessr_statistics.delete_user_stats(interaction.guild.id, target_user.id)
         guessr_statistics.save_stats()
         await interaction.response.send_message(
             f"{target_user.name} has been removed from the statistics!"
