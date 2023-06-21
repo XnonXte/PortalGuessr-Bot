@@ -1,6 +1,6 @@
 # PortalGuessr
 
-PortalGuessr is a Python bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Written in Python with [py-cord](https://github.com/Pycord-Development/pycord) library.
+PortalGuessr is a Python bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Written in Python with discord.py library.
 
 ## Contributions
 
