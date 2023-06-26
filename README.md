@@ -20,7 +20,7 @@ pip install -r requirements.txt
 
 ## Changelogs
 
-- v0.4-beta:
+- v0.4-beta-Unstable-Version:
 
   - Overhauled commands into using cogs for ease of development.
   - Added the /upload command to upload an image directly to the bot.
