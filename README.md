@@ -1,6 +1,6 @@
 # PortalGuessr
 
-PortalGuessr is a Python bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Written in Python with discord.py library.
+PortalGuessr is a Discord bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr. Written in Python with discord.py library.
 
 ## Contributions
 
@@ -8,7 +8,7 @@ We welcome contributions to enhance the data sets used by the bot. If you would 
 
 ## Self-hosting the bot
 
-Hosting the bot is straightforward. Simply modify the token argument inside the `bot.run()` function and launch `start.bat` for an easy startup. You can download the release version if available.
+Hosting the bot is straightforward. Simply modify the token argument inside the `bot.run()` function and launch `launch.bat` for an easy startup. You can download the release version if available.
 
 ### Requirements
 
@@ -20,12 +20,22 @@ pip install -r requirements.txt
 
 ## Changelogs
 
+- v0.4-beta:
+
+  - Overhauled commands into using cogs for ease of development.
+  - Added the /upload command to upload an image directly to the bot.
+  - Reworked config commands; added /clear_stats.
+  - Several QoL changes and bug fixes.
+  - added a lot of emojis.
+  - Revamped /help message.
+  - Added ;sync to sync slash commands into the tree.
+
 - v0.3.1-beta:
 
-  - Added activity status
-  - Renamed much of leaderboard to statistics
+  - Added activity status.
+  - Renamed much of leaderboard to statistics.
   - Statistics (previously leaderboard) are now available for every server and they're separate from each other.
-  - Removes admin.py in components and instead rely on app_commands.checks.has_permission() for permissions check.
+  - Removes admin.py in components and instead relies on app_commands.checks.has_permission() for permissions check.
 
 - v0.3-beta:
 
