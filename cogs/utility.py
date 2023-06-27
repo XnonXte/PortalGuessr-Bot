@@ -7,7 +7,7 @@ Copyright (c) 2023 XnonXte
 import discord
 from discord import app_commands
 from discord.ext import commands
-from components import buttons, const
+from components import const
 
 
 class Utility(commands.Cog):
@@ -26,7 +26,7 @@ class Utility(commands.Cog):
     async def help(self, interaction: discord.Interaction):
         help_message_embed = discord.Embed(
             title="About PortalGuessr",
-            description="PortalGuessr is a bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr, thus the name PortalGuessr.\n\nIntrested on contributing? Join our discord server: [invite link](https://discord.gg/hHYfnqa6zS).",
+            description="PortalGuessr is a bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr, thus the name PortalGuessr.\n\nIntrested on contributing? Join our [discord server](https://discord.gg/hHYfnqa6zS).",
             color=const.BOT_COLOR,
             url="https://github.com/XnonXte/PortalGuessr",
         )
@@ -42,7 +42,6 @@ class Utility(commands.Cog):
         await interaction.response.send_message(
             file=discord.File("logo.jpg", filename="logo.jpg"),
             embed=help_message_embed,
-            view=buttons.HelpButtons(),
         )
 
 
