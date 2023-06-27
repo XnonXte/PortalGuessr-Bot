@@ -7,43 +7,45 @@ Copyright (c) 2023 XnonXte
 import discord
 from discord import app_commands
 from discord.ext import commands
-from components import guessing, const
 import requests
-from typing import Literal
 import asyncio
 import datetime
 import pytz
+from components import guessing, const
+from typing import Literal
 
 timezone = pytz.timezone("Asia/Jakarta")
 datetime_now = datetime.datetime.now(timezone)
-guessr_statistics = guessing.GuessrUsersStatistics("db\statistics.json")
+guessr_leaderboard = guessing.GuessrLeaderboard("db\leaderboard.json")
 
 
 class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(description="Removes user from the statistics.")
-    @app_commands.describe(target_user="The user to remove from the statistics.")
+    @app_commands.command(description="Removes a spesific user from the leaderboard.")
+    @app_commands.describe(target_user="The user to remove from the leaderboard.")
     @app_commands.checks.has_permissions(manage_guild=True)
-    async def clear_user_stats(
+    async def remove(
         self, interaction: discord.Interaction, target_user: discord.Member
     ):
         try:
-            guessr_statistics.load_stats()
-            guessr_statistics.delete_user_stats(interaction.guild.id, target_user.id)
-            guessr_statistics.save_stats()
+            guessr_leaderboard.load_leaderboard()
+            guessr_leaderboard.delete_user_leaderboard(
+                interaction.guild.id, target_user.id
+            )
+            guessr_leaderboard.save_leaderboard()
             await interaction.response.send_message(
-                f"{target_user.name} has been removed from the statistics!"
+                f"{target_user.name} has been removed from the leaderboard!"
             )
         except KeyError:
             await interaction.response.send_message(
-                f"{target_user.name} not found in the statistics!", ephemeral=True
+                f"{target_user.name} not found in the leaderboard!", ephemeral=True
             )
 
-    @app_commands.command(description="Clear the statistics (destructive command).")
+    @app_commands.command(description="Clear the server leaderboard.")
     @app_commands.checks.has_permissions(administrator=True)
-    async def clear_stats(self, interaction: discord.Interaction):
+    async def clear(self, interaction: discord.Interaction):
         await interaction.response.send_message(
             f"Are you sure to delete the stats for `{interaction.guild.name}`? Please type the server name to continue!"
         )
@@ -65,15 +67,15 @@ class Config(commands.Cog):
         else:
             if response.content == interaction.guild.name:
                 try:
-                    guessr_statistics.load_stats()
-                    guessr_statistics.delete_server_stats(interaction.guild.id)
-                    guessr_statistics.save_stats()
+                    guessr_leaderboard.load_leaderboard()
+                    guessr_leaderboard.delete_server_leaderboard(interaction.guild.id)
+                    guessr_leaderboard.save_leaderboard()
                     await interaction.followup.send(
-                        f"Successfully removed {interaction.guild.name} from the statistics!"
+                        f"Successfully removed {interaction.guild.name} from the leaderboard!"
                     )
                 except KeyError:
                     await interaction.followup.send(
-                        f"{interaction.guild.name} not found in the statistics!"
+                        f"{interaction.guild.name} not found in the leaderboard!"
                     )
             else:
                 await interaction.followup.send("Not quite!")
@@ -131,9 +133,7 @@ class Config(commands.Cog):
         get_image = requests.get(image.url)
 
         try:
-            with open(
-                f"images/user_uploaded_chambers/{image_uploaded_filename}", "wb"
-            ) as f:
+            with open(f"images/user_chambers/{image_uploaded_filename}", "wb") as f:
                 f.write(get_image.content)
         except Exception as e:
             await interaction.response.send_message(f"An error occured: {e}")

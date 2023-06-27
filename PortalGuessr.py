@@ -8,10 +8,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-# PortalGuessr v0.4-beta-Unstable-Version
-# This is a unstable version of the bot, expect some instability with it, stable version should be released soon.
-
-# todo list is on https://trello.com/b/iQgOc5H1/portalguesser
+# PortalGuessr v0.4-beta
 
 import discord
 from discord.ext import commands
@@ -71,9 +68,8 @@ async def on_ready():
 
 @bot.command()
 @commands.is_owner()
-async def sync(ctx: commands.Context, option: Optional[Literal["guild", "clear"]]):
-    """Syncs commands into commands.Bot.tree, this is a secret command that everyone but the owner of this bot shouldn't know.."""
-    if option == "guild":
+async def sync(ctx: commands.Context, option: Optional[Literal["local", "clear"]]):
+    if option == "local":
         synced = await ctx.bot.tree.sync(guild=ctx.guild)
     elif option == "clear":
         ctx.bot.tree.clear_commands(guild=ctx.guild)
@@ -82,7 +78,7 @@ async def sync(ctx: commands.Context, option: Optional[Literal["guild", "clear"]
     else:
         synced = await ctx.bot.tree.sync()
     await ctx.send(
-        f"{len(synced)} command(s) synced {'globally' if option == 'global' else f'to {ctx.guild.name}'}."
+        f"{len(synced)} command(s) synced {'globally' if option is None else f'to {ctx.guild.name}'}."
     )
 
 

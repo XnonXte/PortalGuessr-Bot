@@ -6,10 +6,10 @@ MAIN_COMMANDS = """
 `help` - Shows an overview of the available slash command.
 `ping` - Returns the bot's latency.
 `guess` - Starts a Portalguesser game.
-`stats` - Returns the current statistics.
+`leaderboard` - Returns the current leaderboard.
 """
 CONFIG_COMMANDS = """
-`clear_stats` - Clear the server statistics.
-`clear_user_stats` - Removes a spesific user from the statistics.
+`clear` - Clear the server leaderboard.
+`remove` - Removes a spesific user from the leaderboard.
 `upload` - Uploads a chamber image directly to the bot.
 """

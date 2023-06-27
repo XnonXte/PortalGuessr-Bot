@@ -34,11 +34,8 @@ class Utility(commands.Cog):
         help_message_embed.add_field(
             name="Config Commands", value=const.CONFIG_COMMANDS, inline=False
         )
-        help_message_embed.set_author(
-            name="XnonXte & Contributors", icon_url="attachment://logo.jpg"
-        )
         help_message_embed.set_footer(
-            text=f"PortalGuessr {const.BOT_VERSION} - Created with 💖 by XnonXte & Contributors.",
+            text=f"PortalGuessr {const.BOT_VERSION} | Created with 💖 by XnonXte.",
             icon_url="attachment://logo.jpg",
         )
         help_message_embed.set_thumbnail(url="attachment://logo.jpg")

@@ -20,6 +20,12 @@ pip install -r requirements.txt
 
 ## Changelogs
 
+- v0.4-beta:
+
+  - Renamed a few commands, mainly reverting statistics to leaderboard.
+  - major rework to /guess, mainly how the bot would send the message and response to the user.
+  - Added the correct answer to the timeout message due to recent demand for it.
+
 - v0.4-beta-Unstable-Version:
 
   - Overhauled commands into using cogs for ease of development.

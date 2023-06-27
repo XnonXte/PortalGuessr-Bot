@@ -1,7 +1,7 @@
-import os
-import random
-import json
 import discord
+import os
+import json
+import random
 
 
 chambers_list = [
@@ -36,7 +36,7 @@ class Guessr:
             "Easy": discord.Color.from_rgb(46, 139, 87),
             "Medium": discord.Color.from_rgb(204, 204, 0),
             "Hard": discord.Color.from_rgb(178, 34, 34),
-            "Very Hard": discord.Color.from_rgb(255, 0, 0),
+            "Very Hard": discord.Color.from_rgb(0, 0, 0),
         }
         self.difficulty_timeouts = {
             "Easy": 20,
@@ -65,15 +65,15 @@ class Guessr:
         )
 
 
-class GuessrUsersStatistics:
-    """Class to handle the users' statistics. If filename doesn't exist, it will create it automatically."""
+class GuessrLeaderboard:
+    """Class to handle the users' leaderboard. If filename doesn't exist, it will create it automatically."""
 
     def __init__(self, filepath):
         self.filepath = filepath
         self.stats = {}
 
-    def load_stats(self):
-        """Load the users' stats from the statistics."""
+    def load_leaderboard(self):
+        """Load the users' stats from the leaderboard."""
         try:
             with open(self.filepath, "r") as file:
                 self.stats = json.load(file)
@@ -83,13 +83,13 @@ class GuessrUsersStatistics:
                 self.stats = {}
                 return self.stats
 
-    def save_stats(self):
-        """Save the users' stats to the statistics."""
+    def save_leaderboard(self):
+        """Save the users' stats to the leaderboard."""
         with open(self.filepath, "w") as file:
             json.dump(self.stats, file)
 
-    def add_user_stats(self, server_id, user_id, difficulty):
-        """Add a user's stats to the statistics."""
+    def add_user_leaderboard(self, server_id, user_id, difficulty):
+        """Add a user's stats to the leaderboard."""
         server_id = str(server_id)
         user_id = str(user_id)
         if server_id not in self.stats:
@@ -101,42 +101,46 @@ class GuessrUsersStatistics:
                 "Hard": 0,
                 "Very Hard": 0,
             }
+        if difficulty not in self.stats[server_id][user_id]:
+            self.stats[server_id][user_id][difficulty] = 0
         self.stats[server_id][user_id][difficulty] += 1
 
-    def get_sorted_stats(self, server_id):
+    def get_sorted_leaderboard(self, server_id, limit):
         """Returns a sorted list of users' stats in descending order"""
         server_id = str(server_id)
         if server_id not in self.stats:
-            raise KeyError("Server not found in statistics.")
-        sorted_statistics = sorted(
+            raise KeyError("Server not found in leaderboard.")
+        sorted_leaderboard = sorted(
             self.stats[server_id].items(),
             key=lambda x: sum(x[1].values()),
             reverse=True,
         )
-        return sorted_statistics
+        if limit != None:
+            sorted_leaderboard = sorted_leaderboard[:limit]
+        return sorted_leaderboard
 
-    def get_user_stats(self, server_id, user_id):
+    def get_user_leaderboard(self, server_id, user_id):
         """Returns a user's stats"""
         server_id = str(server_id)
         user_id = str(user_id)
         if server_id not in self.stats:
-            raise KeyError("Server not found in statistics.")
+            raise KeyError("Server not found in leaderboard.")
         if user_id not in self.stats[server_id]:
-            raise KeyError("User not found in statistics.")
+            raise KeyError("User not found in leaderboard.")
         return self.stats[server_id][user_id]
 
-    def delete_user_stats(self, server_id, user_id):
-        """Delete a user's stats from the statistics"""
+    def delete_user_leaderboard(self, server_id, user_id):
+        """Delete a user's stats from the leaderboard"""
         server_id = str(server_id)
         user_id = str(user_id)
         if server_id not in self.stats:
-            raise KeyError("Server not found in statistics.")
+            raise KeyError("Server not found in leaderboard.")
         elif user_id not in self.stats[server_id]:
-            raise KeyError("User not found in statistics.")
+            raise KeyError("User not found in leaderboard.")
         del self.stats[server_id][user_id]
 
-    def delete_server_stats(self, server_id):
+    def delete_server_leaderboard(self, server_id):
         server_id = str(server_id)
         if server_id not in self.stats:
-            raise KeyError("Server not found in statistics!")
+            raise KeyError("Server not found in leaderboard!")
         del self.stats[server_id]
