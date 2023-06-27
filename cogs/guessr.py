@@ -233,10 +233,7 @@ class Guessr(commands.Cog):
                         description=f"The correct answer was **{guessr_correct_answer}**.",
                         color=discord.Color.from_rgb(237, 237, 237),
                     )
-                    await interaction.channel.send(
-                        file=discord.File("logo.jpg", filename="logo.jpg"),
-                        embed=timeout_embed,
-                    )
+                    await interaction.channel.send(embed=timeout_embed)
                     incorrect_guessr += 1
                     break
 
