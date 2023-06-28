@@ -11,11 +11,11 @@ We welcome contributions to enhance the data sets used by the bot. If you would 
 
 ## Self-hosting the bot
 
-If you'd like to host the bot for yourself, you oculd do so by modifying the token argument inside the `bot.run()` function and launch `launch.bat` for an easy startup. You can download the release version if available.
+If you'd like to host the bot for yourself, you could do so by modifying the token argument inside the `bot.run()` function and launch `launch.bat` for an easy startup. Download the release version if available.
 
 ### Requirements
 
-The requirements.txt should contain the required libraries that your IDE will depend on to run this bot locally, and they will be installed using:
+The requirements.txt should contain the required libraries that your IDE will depend on to run this bot locally, and they will be installed by running:
 
 ```shell
 pip install -r requirements.txt
