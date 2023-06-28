@@ -11,5 +11,5 @@ MAIN_COMMANDS = """
 CONFIG_COMMANDS = """
 `clear` - Clear the server leaderboard.
 `remove` - Removes a spesific user from the leaderboard.
-`upload` - Uploads a chamber image directly to the bot.
+`submit` - Uploads a chamber image directly to the bot.
 """

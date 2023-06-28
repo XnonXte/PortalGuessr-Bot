@@ -10,7 +10,7 @@ from discord.ext import commands
 from typing import Optional
 from components import guessing, const
 
-guessr_leaderboard = guessing.GuessrLeaderboard("db\leaderboard.json")
+guessr_leaderboard = guessing.GuessrLeaderboard("database/leaderboard.json")
 
 
 class GuessrLeaderboardManager(commands.Cog):

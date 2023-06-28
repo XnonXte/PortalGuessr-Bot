@@ -16,7 +16,7 @@ from typing import Literal
 
 timezone = pytz.timezone("Asia/Jakarta")
 datetime_now = datetime.datetime.now(timezone)
-guessr_leaderboard = guessing.GuessrLeaderboard("db\leaderboard.json")
+guessr_leaderboard = guessing.GuessrLeaderboard("database/leaderboard.json")
 
 
 class Config(commands.Cog):
@@ -86,7 +86,7 @@ class Config(commands.Cog):
         difficulty="The expected difficulty to guess this image.",
         chamber="Enter the correct chamber.",
     )
-    async def upload(
+    async def submit(
         self,
         interaction: discord.Interaction,
         image: discord.Attachment,
@@ -139,13 +139,13 @@ class Config(commands.Cog):
             await interaction.response.send_message(f"An error occured: {e}")
         else:
             upload_embed = discord.Embed(
-                title=f"Successfully Uploaded {image_filename}!",
+                title=f"Successfully submitted {image_filename}!",
                 color=const.BOT_COLOR,
             )
             upload_embed.set_image(url=image.url)
             upload_embed.set_footer(
                 icon_url="attachment://logo.jpg",
-                text="Please wait for your image to be approved by the developer (or not).",
+                text="Your image needs to be reviewed by the developer before it gets added into the database.",
             )
             await interaction.response.send_message(
                 file=discord.File("logo.jpg", filename="logo.jpg"), embed=upload_embed

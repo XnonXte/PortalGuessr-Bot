@@ -14,7 +14,7 @@ import time
 from collections import Counter
 from components import guessing, const
 
-guessr_statistics = guessing.GuessrLeaderboard("db\leaderboard.json")
+guessr_statistics = guessing.GuessrLeaderboard("database/leaderboard.json")
 is_guessr_running = False
 
 

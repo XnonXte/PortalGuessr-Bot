@@ -18,7 +18,7 @@ from replit import keep_alive
 from typing import Literal, Optional
 
 dotenv.load_dotenv(".env")
-token = os.environ["DEVTOKEN"]
+token = os.environ["TOKEN"]
 prefix = commands.when_mentioned_or(";")
 intents = discord.Intents.default()
 intents.message_content = True
