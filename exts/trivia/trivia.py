@@ -40,14 +40,14 @@ class TriviaCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(description="Starts a PortalGuessr game")
+    @commands.hybrid_command(description="Starts a PortalGuessr game")
     @app_commands.describe(
         difficulty="The desired difficulty",
         rounds="Session rounds",
     )
     async def guess(
         self,
-        interaction: discord.Interaction,
+        ctx: commands.Context,
         difficulty: Literal["Random", "Easy", "Medium", "Hard", "Very Hard"],
         rounds: Optional[int] = 10,
     ):
@@ -58,30 +58,30 @@ class TriviaCommands(commands.Cog):
             """This checks for the same channel and valid chambers."""
             # Added the option to skip or stop the current game.
             return (
-                message.guild.id == interaction.guild.id
-                and message.channel.id == interaction.channel.id
+                message.guild.id == ctx.guild.id
+                and message.channel.id == ctx.channel.id
                 and message.content.lower() in trivia.chambers_list + ["skip", "stop"]
             )
 
         # Check if a PortalGuessr game is already running in the specified channel.
         if rounds <= 0:
             # You can't have 0 or less rounds.
-            await interaction.response.send_message(
+            await ctx.send(
                 "You can't have sessions equal or less than 0!", ephemeral=True
             )
             return
 
-        if interaction.channel_id in running_channel_list:
-            await interaction.response.send_message(
-                f"A PortalGuessr game is already running in {interaction.channel.id}, please wait until the game has finished or start another one on different channel!",
+        if ctx.channel.id in running_channel_list:
+            await ctx.send(
+                f"A PortalGuessr game is already running in {ctx.channel.id}, please wait until the game has finished or start another one on different channel!",
                 ephemeral=True,
             )
             return
 
-        running_channel_list.append(interaction.channel_id)
+        running_channel_list.append(ctx.channel.id)
 
         # We use defer() to prevent interaction error caused by the bot not being able to response withing 3 seconds window (i.e. slow internet connection).
-        await interaction.response.defer()
+        await ctx.defer()
 
         trivia_correct = 0
         trivia_incorrect = 0
@@ -125,12 +125,12 @@ class TriviaCommands(commands.Cog):
             trivia_timeout = trivia_timeout
 
             if round == 0:
-                await interaction.followup.send(
+                await ctx.send(
                     files=image_and_logo,
                     embed=trivia_stop_skip_embed,
                 )
             else:
-                await interaction.channel.send(
+                await ctx.channel.send(
                     files=image_and_logo,
                     embed=trivia_stop_skip_embed,
                 )
@@ -148,7 +148,7 @@ class TriviaCommands(commands.Cog):
                         or response.content.lower() == "stop"
                     ):
                         # Skip or stop the current session of the game.
-                        if response.author.id == interaction.user.id:
+                        if response.author.id == ctx.author.id:
                             if response.content.lower() == "skip":
                                 title = "Guessr Skipped!"
                             else:
@@ -157,7 +157,7 @@ class TriviaCommands(commands.Cog):
                             trivia_stop_skip_embed = discord.Embed(
                                 title=title, color=const.BOT_COLOR
                             )
-                            await interaction.channel.send(embed=trivia_stop_skip_embed)
+                            await ctx.channel.send(embed=trivia_stop_skip_embed)
 
                             if response.content.lower() == "skip":
                                 trivia_skipped += 1
@@ -209,7 +209,7 @@ class TriviaCommands(commands.Cog):
                             # Saving the score into leaderboard logic.
                             trivia_leaderboard.load_leaderboard()
                             trivia_leaderboard.add_user_leaderboard(
-                                interaction.guild.id,
+                                ctx.guild.id,
                                 response.author.id,
                                 trivia_difficulty,
                             )
@@ -226,7 +226,7 @@ class TriviaCommands(commands.Cog):
                                 description="5 or more people have answered.",
                                 color=discord.Color.from_rgb(237, 237, 237),
                             )
-                            await interaction.channel.send(embed=max_guess_embed)
+                            await ctx.channel.send(embed=max_guess_embed)
                             trivia_incorrect += 1
                             break
                     else:
@@ -252,7 +252,7 @@ class TriviaCommands(commands.Cog):
                         description=f"The correct answer was **{trivia_correct_answer}**.",
                         color=discord.Color.from_rgb(237, 237, 237),
                     )
-                    await interaction.channel.send(embed=timeout_embed)
+                    await ctx.channel.send(embed=timeout_embed)
                     trivia_incorrect += 1
                     break
 
@@ -286,19 +286,19 @@ class TriviaCommands(commands.Cog):
         trivia_ending_embed.set_thumbnail(url="attachment://game_over.png")
         trivia_ending_embed.set_footer(
             icon_url="attachment://logo.jpg",
-            text=f"/leaderboard to open the statistics for {interaction.guild.name}!",
+            text=f"/leaderboard to open the statistics for {ctx.guild.name}!",
         )
         files = [
             discord.File("logo.jpg", filename="logo.jpg"),
             discord.File("images/local/game_over.png", filename="game_over.png"),
         ]
-        await interaction.followup.send(
+        await ctx.send(
             files=files,
             embed=trivia_ending_embed,
         )
 
         # Ending the game instance.
-        running_channel_list.remove(interaction.channel_id)
+        running_channel_list.remove(ctx.channel.id)
 
 
 async def setup(bot):

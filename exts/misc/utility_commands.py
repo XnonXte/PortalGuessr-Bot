@@ -14,16 +14,14 @@ class UtilityCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(description="Returns the bot's latency.")
-    async def ping(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"Pong! `{round(self.bot.latency * 1000)}` ms"
-        )
+    @commands.hybrid_command(description="Returns the bot's latency.")
+    async def ping(self, ctx: commands.Context):
+        await ctx.send(f"Pong! `{round(self.bot.latency * 1000)}` ms")
 
-    @app_commands.command(
+    @commands.hybrid_command(
         description="Shows an overview of the available slash commands."
     )
-    async def help(self, interaction: discord.Interaction):
+    async def help(self, ctx: commands.Context):
         help_message_embed = discord.Embed(
             title="About PortalGuessr",
             description="PortalGuessr is a bot that challenges you to guess a Portal chamber from a random picture taken from various locations, similar to GeoGuessr, thus the name PortalGuessr.\n\nIntrested on contributing? Join our [discord server](https://discord.gg/hHYfnqa6zS).",
@@ -39,7 +37,7 @@ class UtilityCommands(commands.Cog):
             icon_url="attachment://logo.jpg",
         )
         help_message_embed.set_thumbnail(url="attachment://logo.jpg")
-        await interaction.response.send_message(
+        await ctx.send(
             file=discord.File("logo.jpg", filename="logo.jpg"),
             embed=help_message_embed,
         )

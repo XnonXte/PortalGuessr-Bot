@@ -14,9 +14,10 @@ import os
 from typing import Literal, Optional
 
 import discord
+from discord import app_commands
 from discord.ext import commands
-import dotenv
 
+import dotenv
 from replit import keep_alive
 
 dotenv.load_dotenv(".env")
@@ -42,7 +43,7 @@ class PortalGuessr(commands.Bot):
             print(f"The following cog(s) failed to load: {failed}")
 
 
-bot = PortalGuessr(command_prefix=prefix, intents=intents)
+bot = PortalGuessr(command_prefix=prefix, intents=intents, help_command=None)
 
 
 @bot.event
@@ -84,14 +85,31 @@ async def sync(ctx: commands.Context, option: Optional[Literal["local", "clear"]
     )
 
 
-@sync.error
-async def on_command_error(ctx: commands.Context, error: commands.CommandInvokeError):
-    if isinstance(error, commands.NotOwner):
-        await ctx.send(f"You're not the owner of this bot! Error: {error}")
-    elif isinstance(error, commands.BadLiteralArgument):
-        await ctx.send(f"Invalid argument(s)! Error: {error}")
+@bot.event
+async def on_command_error(ctx: commands.Context, err: discord.DiscordException):
+    if isinstance(err, commands.CommandNotFound):
+        await ctx.send(err)
+    elif isinstance(err, commands.NotOwner):
+        await ctx.send(err)
+    elif isinstance(err, commands.BadLiteralArgument):
+        await ctx.send(err)
+    elif isinstance(err, commands.MissingRequiredArgument):
+        await ctx.send(err)
+    elif isinstance(err, commands.BadArgument):
+        await ctx.send(err)
     else:
-        raise error
+        raise err
+
+
+@bot.event
+async def on_app_command_error(ctx: commands.Context, err: discord.DiscordException):
+    if isinstance(err, app_commands.MissingPermissions):
+        await ctx.send(
+            f"You're missing the required permission to run this command - Error: {err}",
+            ephemeral=True,
+        )
+    else:
+        raise err
 
 
 # Keeping the bot alive and running the bot.
