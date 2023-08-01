@@ -1,7 +1,8 @@
-import discord
 import os
 import json
 import random
+
+import discord
 
 
 chambers_list = [
@@ -30,7 +31,7 @@ chambers_list = [
 ]
 
 
-class Guessr:
+class TriviaGame:
     def __init__(self):
         self.difficulty_colors = {
             "Easy": discord.Color.from_rgb(46, 139, 87),
@@ -65,7 +66,7 @@ class Guessr:
         )
 
 
-class GuessrLeaderboard:
+class TriviaLeaderboard:
     """Class to handle the users' leaderboard. If filename doesn't exist, it will create it automatically."""
 
     def __init__(self, filepath):

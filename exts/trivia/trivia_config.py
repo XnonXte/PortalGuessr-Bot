@@ -4,37 +4,36 @@ Cog for config related commands.
 Copyright (c) 2023 XnonXte
 """
 
+import asyncio
+import requests
+import datetime
+from typing import Literal
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-import requests
-import asyncio
-import datetime
-import pytz
-from components import guessing, const
-from typing import Literal
 
-timezone = pytz.timezone("Asia/Jakarta")
-datetime_now = datetime.datetime.now(timezone)
-guessr_leaderboard = guessing.GuessrLeaderboard("database/leaderboard.json")
+from modules import const, trivia
+
+trivia_leaderboard = trivia.TriviaLeaderboard("database/leaderboard.json")
 
 
 class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(description="Removes a spesific user from the leaderboard.")
-    @app_commands.describe(target_user="The user to remove from the leaderboard.")
+    @app_commands.command(description="Removes a spesific user from the leaderboard")
+    @app_commands.describe(target_user="The user to remove from the leaderboard")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def remove(
         self, interaction: discord.Interaction, target_user: discord.Member
     ):
         try:
-            guessr_leaderboard.load_leaderboard()
-            guessr_leaderboard.delete_user_leaderboard(
+            trivia_leaderboard.load_leaderboard()
+            trivia_leaderboard.delete_user_leaderboard(
                 interaction.guild.id, target_user.id
             )
-            guessr_leaderboard.save_leaderboard()
+            trivia_leaderboard.save_leaderboard()
             await interaction.response.send_message(
                 f"{target_user.name} has been removed from the leaderboard!"
             )
@@ -67,9 +66,9 @@ class Config(commands.Cog):
         else:
             if response.content == interaction.guild.name:
                 try:
-                    guessr_leaderboard.load_leaderboard()
-                    guessr_leaderboard.delete_server_leaderboard(interaction.guild.id)
-                    guessr_leaderboard.save_leaderboard()
+                    trivia_leaderboard.load_leaderboard()
+                    trivia_leaderboard.delete_server_leaderboard(interaction.guild.id)
+                    trivia_leaderboard.save_leaderboard()
                     await interaction.followup.send(
                         f"Successfully removed {interaction.guild.name} from the leaderboard!"
                     )
@@ -80,11 +79,11 @@ class Config(commands.Cog):
             else:
                 await interaction.followup.send("Not quite!")
 
-    @app_commands.command(description="Uploads a chamber image directly to the bot.")
+    @app_commands.command(description="Uploads a chamber image directly to the bot")
     @app_commands.describe(
-        image="Image to upload.",
-        difficulty="The expected difficulty to guess this image.",
-        chamber="Enter the correct chamber.",
+        image="Image to upload",
+        difficulty="The expected difficulty to guess this image",
+        chamber="Enter the correct chamber",
     )
     async def submit(
         self,
@@ -124,12 +123,12 @@ class Config(commands.Cog):
             )
             return
 
-        image_extension = (
+        file_extension = (
             image_filename[-4:]
             if image_filename.endswith((".jpg", ".png"))
             else image_filename[-5:]
         )
-        image_uploaded_filename = f"{difficulty}-{chamber}-{str(datetime_now.strftime('%Y-%m-%d %H.%M.%S'))}{image_extension}"
+        image_uploaded_filename = f"{difficulty}-{chamber}-{str(datetime.datetime.now().strftime('%Y-%m-%d %H.%M.%S'))}{file_extension}"
         get_image = requests.get(image.url)
 
         try:

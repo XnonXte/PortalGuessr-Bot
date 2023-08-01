@@ -1,3 +1,3 @@
 @echo off
-python PortalGuessr.py
+python main.py
 pause

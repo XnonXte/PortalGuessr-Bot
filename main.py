@@ -8,33 +8,36 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-# PortalGuessr v0.4-beta
+# TODO: Ada a shorthand for chamber number/choices in general (e.g. 04 - 4, e02 - escapes 02).
+
+import os
+from typing import Literal, Optional
 
 import discord
 from discord.ext import commands
-import os
 import dotenv
+
 from replit import keep_alive
-from typing import Literal, Optional
 
 dotenv.load_dotenv(".env")
-token = os.environ["TOKEN"]
-prefix = commands.when_mentioned_or(";")
+token = os.environ["DEV"]
+prefix = commands.when_mentioned_or("!?")
 intents = discord.Intents.default()
 intents.message_content = True
 
 
 class PortalGuessr(commands.Bot):
     async def setup_hook(self):
-        """Loading cogs into the bot."""
+        """Loading up cogs"""
         failed = []
-        for cog in os.listdir("cogs"):
-            try:
-                if cog.endswith(".py"):
-                    await self.load_extension(f"cogs.{cog[:-3]}")
-            except Exception as e:
-                print(e)
-                failed.append(cog)
+        for ext in os.listdir("./exts"):
+            for cog in os.listdir(f"./exts/{ext}"):
+                try:
+                    if cog.endswith(".py") and cog != "__init__.py":
+                        await self.load_extension(f"exts.{ext}.{cog[:-3]}")
+                except Exception as e:
+                    print(e)
+                    failed.append(ext)
         if failed:
             print(f"The following cog(s) failed to load: {failed}")
 
