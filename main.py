@@ -8,8 +8,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-# TODO: Ada a shorthand for chamber number/choices in general (e.g. 04 - 4, e02 - escapes 02).
-
 import os
 from typing import Literal, Optional
 
@@ -17,11 +15,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-import dotenv
 from replit import keep_alive
 
-dotenv.load_dotenv(".env")
-token = os.environ["DEV"]
+TOKEN = ""
 prefix = commands.when_mentioned_or("!?")
 intents = discord.Intents.default()
 intents.message_content = True
@@ -114,4 +110,4 @@ async def on_app_command_error(ctx: commands.Context, err: discord.DiscordExcept
 
 # Keeping the bot alive and running the bot.
 keep_alive.keep_alive()
-bot.run(token)
+bot.run(TOKEN)
