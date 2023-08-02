@@ -64,7 +64,7 @@ PortalGuessr is in continuous development, and it's currently supported by a sin
    pip install -r requirements.txt
    ```
 
-3. Change the "TOKEN" variable to your own discord token.
+3. Change the "TOKEN" constant variable to your own discord token.
 4. Run `python -m main.py` or start **launch.bat**.
 5. Done.
 
