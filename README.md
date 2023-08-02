@@ -49,7 +49,7 @@ PortalGuessr is an add-free, no paywall, and open-source project. Invite it to y
 
 ## Contributions
 
-PortalGuessr is in continuous development, and it's currently supported by a single person (me). So if you want to contribute, please join our [Official Discord Server](https://discord.gg/hHYfnqa6zS)!
+PortalGuessr is in continuous development, and it's currently supported by a single person (me). So if you want to contribute, please join our [Official Discord Server](https://discord.gg/djWRTEM8XZ)!
 
 ## Credits
 
