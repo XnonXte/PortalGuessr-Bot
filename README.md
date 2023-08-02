@@ -24,15 +24,13 @@
 <p align="center">
   <a href="#overview">Overview</a>
   -
-  <a href="#invite">Invite</a>
+  <a href="#invite-the-bot">Invite</a>
   -
-  <a href="#contributions
-">Contributions</a>
+  <a href="#contributions">Contributions</a>
   -
   <a href="#credits">Credits</a>
   -
-  <a href="#installation
-">Instalation</a>
+  <a href="#installation">Instalation</a>
   -
   <a href="#license">License</a>
 </p>
@@ -43,21 +41,21 @@ PortalGuessr is a discord bot that challenges you to guess a Portal chamber from
 
 See [previews](previews/) for previews of the bot.
 
-## Invite
+### Invite The Bot
 
-Invite the bot to your server (no setup needed):
+PortalGuessr is an add-free, no paywall, and open-source project. Invite it to your own server with no further setup needed!
 | [INVITE LINK](https://discord.com/api/oauth2/authorize?client_id=1117773586522968105&permissions=2147601472&scope=bot%20applications.commands) |
 | ----------- |
 
-# Contributions
+## Contributions
 
 PortalGuessr is in continuous development, and it's currently supported by a single person (me). So if you want to contribute, please join our [Official Discord Server](https://discord.gg/hHYfnqa6zS)!
 
-# Credits
+## Credits
 
 - Everyone in ITB for beta-testing the bot.
 
-# Installation
+## Installation
 
 1. Download the latest version of the bot (release if available).
 2. Install the required dependencies with:
@@ -70,7 +68,7 @@ PortalGuessr is in continuous development, and it's currently supported by a sin
 4. Run `python -m main.py` or start **launch.bat**.
 5. Done.
 
-# License
+## License
 
 This project is released under MIT License, see MIT for more information.
 
