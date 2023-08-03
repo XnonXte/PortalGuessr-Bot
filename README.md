@@ -24,13 +24,13 @@
 <p align="center">
   <a href="#overview">Overview</a>
   -
-  <a href="#invite-the-bot">Invite</a>
+  <a href="#invite-the-bot">Invite Link</a>
   -
   <a href="#contributions">Contributions</a>
   -
   <a href="#credits">Credits</a>
   -
-  <a href="#installation">Instalation</a>
+  <a href="#installation">Installation</a>
   -
   <a href="#license">License</a>
 </p>
